@@ -152,6 +152,7 @@ def main(positions,leaves):
     nonleaves = leaves_to_nonleaves(leaves)
     root = BTree(0)
     root.cost = 0 # 初始开销
+    global min_cost
     min_cost = sum(leaf_cost.values()) # 最小开销
     optimal = None # 最优解
     tmp_trees = [root] # 待遍历集合
@@ -169,7 +170,7 @@ def main(positions,leaves):
         else: # 树不完整
             tmp_trees.extend(news) # 加入新结果
             tmp_trees.sort(key=lambda x:x.cost-x.depth) # 排序
-    # print("ans is ", min_cost)
+    print("ans is ", min_cost)
     return optimal,min_cost
 
 def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
@@ -192,7 +193,8 @@ def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
         for choice in choose(sep,ak):
             new = tree.new_tree_by_positions(choice)
             new.cost += sum(nonleaf_cost[i] for i in sep if i not in choice)
-            news.append(new)
+            if new.cost <= min_cost:
+                news.append(new)
     elif len(sep) <= ak <= len(sep)+len(whatever): # 展开适中，不增加开销
         choice = sep + whatever[:ak-len(sep)]
         news = [tree.new_tree_by_positions(choice)]
@@ -201,11 +203,8 @@ def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
         choice = not_sep[:ak-len(sep)-len(whatever)]
         new = tree.new_tree_by_positions(sep+whatever+choice)
         new.cost += sum(leaf_cost[i] for i in choice)
-        news.append(new)
-        # for choice in choose(not_sep,ak-len(sep)-len(whatever)):
-        #     new = tree.new_tree_by_positions(sep+whatever+choice)
-        #     new.cost += sum(leaf_cost[i] for i in choice)
-        #     news.append(new)
+        if new.cost <= min_cost:
+            news.append(new)
     if nonleaves[k+1]==0:
         is_end = True
         if k+2<n: # 剩下节点合并

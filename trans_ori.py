@@ -207,7 +207,7 @@ def test(positions, arr):
     global ans
     ans = math.inf
     dfs(positions, arr, 0, 0)
-    # print("ans is ", ans)
+    print("ans is ", ans)
 
 def main():
     '''
