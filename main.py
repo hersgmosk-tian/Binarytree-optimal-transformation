@@ -65,7 +65,7 @@ def main():
                 # tmp_arr = BTree.tree_to_positions(tmp_arr)
                 # positons.append(tmp_arr)
             # else:
-            tmp_arr = trans_update.BTree.random_binary_tree(randint(1, depth), 1, 200)
+            tmp_arr = trans_update.BTree.random_binary_tree(randint(1, depth), 0, 200)
             tmp_arr = trans_update.BTree.tree_to_positions(tmp_arr)
             positons.append(tmp_arr)
         # print(len(positons))
@@ -77,6 +77,7 @@ def main():
             ttmp_tar = random_leaf_seq(depth + 1)
             for kk in range(len(tmp_tar)):
                 tmp_tar[kk] += ttmp_tar[kk]
+        # print(positons[0][:10], tmp_tar)
         time_start=time.time()
         "position是树的现有状态，每个位置上的值为value或none，tmp_tar为target"
         ans_list1.append(trans_ori.test([positons[0]], tmp_tar))

@@ -128,6 +128,7 @@ def choose(data,n):
     assert n>0,"不能取0个"
     if n > len(data) : return []
     res = [list(i) for i in combinations(data,n)]
+    return res
 
 
 def get_nodes_cost(tree):
@@ -154,6 +155,9 @@ def main(positions,leaves):
     root.cost = 0 # 初始开销
     global min_cost
     min_cost = sum(leaf_cost.values()) # 最小开销
+    # 提前找min_cost 
+    min_greedy = greedy_mincost(root, nonleaves, nonleaf_cost, leaf_cost)
+    print(min_greedy)
     optimal = None # 最优解
     tmp_trees = [root] # 待遍历集合
     while len(tmp_trees):
@@ -190,9 +194,12 @@ def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
             whatever.append(node.position)
     # 产生新树
     if ak < len(sep): # 展开少，取 sep 子集，增加未取部分开销
+        # print(choose(sep,ak))
         for choice in choose(sep,ak):
             new = tree.new_tree_by_positions(choice)
             new.cost += sum(nonleaf_cost[i] for i in sep if i not in choice)
+            # cost_pre = cost_lowerbound(new, nonleaves, nonleaf_cost, leaf_cost)
+            # print(new.cost, cost_pre)
             if new.cost <= min_cost:
                 news.append(new)
     elif len(sep) <= ak <= len(sep)+len(whatever): # 展开适中，不增加开销
@@ -203,6 +210,8 @@ def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
         choice = not_sep[:ak-len(sep)-len(whatever)]
         new = tree.new_tree_by_positions(sep+whatever+choice)
         new.cost += sum(leaf_cost[i] for i in choice)
+        # cost_pre = cost_lowerbound(new, nonleaves, nonleaf_cost, leaf_cost)
+        # print(new.cost, cost_pre)
         if new.cost <= min_cost:
             news.append(new)
     if nonleaves[k+1]==0:
@@ -211,6 +220,88 @@ def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
             for new in news:
                 new.cost += sum(nonleaf_cost.get(node.position,0) for node in new.last_layer)
     return news,is_end
+
+
+def greedy_mincost(tree, nonleaves, nonleaf_cost, leaf_cost):
+    new = deepcopy(tree)
+    d = 0
+    # 目标是0， 直接全合成，取nonleaf的root的value
+    if nonleaves[d] == 0:
+        return nonleaf_cost[new.last_layer]
+
+    for node in new.last_layer: # 最后一层
+        new.add_left_right_to_node(node) # 展开
+        new._max_depth += 1
+        if len(leaf_cost) == 1:
+            return leaf_cost[node]
+
+    while nonleaves[d] != 0:
+        d += 1
+        ak = nonleaves[d]
+
+        # calculate the node type of depth d
+        sep,not_sep,whatever = [],[],[]
+        for node in new.last_layer:
+            if node.position in nonleaf_cost:
+                sep.append(node.position)
+            elif node.position in leaf_cost:
+                not_sep.append(node.position)
+            else:
+                whatever.append(node.position)
+
+        # make the choice and calculate the next level of the tree
+        if ak<len(sep):
+            sep.sort(key = lambda s : nonleaf_cost[s])
+            choice = sep[:len(sep) - ak]
+            for node in new.last_layer: # 最后一层
+                if node.position not in choice:
+                    new.add_left_right_to_node(node) # 展开
+            new.cost += sum(nonleaf_cost[i] for i in choice)
+            new._max_depth += 1 # 总深度+1
+
+        elif len(sep) <= ak <= len(sep)+len(whatever): # 展开适中，不增加开销
+            choice = sep + whatever[:ak-len(sep)]
+            for node in new.last_layer: # 最后一层
+                if node.position in choice:
+                    new.add_left_right_to_node(node) # 展开
+            new._max_depth += 1 # 总深度+1
+
+        else:
+            not_sep.sort(key = lambda s: leaf_cost[s])
+            choice = not_sep[:ak-len(sep)-len(whatever)]
+            for node in new.last_layer: # 最后一层
+                if node.position in choice+sep+whatever:
+                    new.add_left_right_to_node(node) # 展开
+            new.cost += sum(leaf_cost[i] for i in choice)
+            new._max_depth += 1 # 总深度+1
+
+    return new.cost
+
+
+
+def cost_lowerbound(tree, nonleaves, nonleaf_cost, leaf_cost):
+    # node_list = tree.last_layer
+    ak = nonleaves[tree.max_depth]
+
+    sep,not_sep,whatever = [],[],[]
+    for node in tree.last_layer:
+        if node.position in nonleaf_cost.keys():
+            sep.append(node.position)
+        elif node.position in leaf_cost.keys():
+            not_sep.append(node.position)
+        else:
+            whatever.append(node.position)
+
+    if ak < len(sep):
+        sep.sort(key = lambda s: nonleaf_cost[s])
+        cost_pre = tree.cost + sum(nonleaf_cost[s] for s in sep[:len(sep)-ak])
+    elif len(sep) <= ak <= len(sep)+len(whatever):
+        cost_pre = tree.cost
+    else:
+        not_sep.sort(key = lambda s: leaf_cost[s])
+        cost_pre = tree.cost + sum(leaf_cost[s] for s in not_sep[:ak-len(sep)-len(whatever)])
+    return cost_pre
+
 
 ### 调试函数 ###
 def get_operations(old,new):

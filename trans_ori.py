@@ -192,7 +192,7 @@ def get_merge_index(nums, k):
     '''
     res = []
     def dfs_getindex(tmp, arr):
-        if len(res) > 6:
+        if len(res) > 60:
             return
         if len(tmp) == k:
             res.append(tmp)
