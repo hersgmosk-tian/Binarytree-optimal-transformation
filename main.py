@@ -16,34 +16,6 @@ def random_nonleaf_seq(n):
     return seq+[0]
 
 def main():
-    '''
-    p = [-1, -2, -4, -6, -10, 11, 21, 35, -7, 40, -11, -5, -8, -9, -12, -14, -16, 12, 5, 50, -15, 20, -17, 111, 9, -13, -3]
-    i = [11, -10, 21, -6, 35, -4, 40, -7, -11, -2, -8, -5, 12, -16, 5, -14, 50, -12, 20, -15, 111, -17, 9, -9, -13, -1, -3]
-    arr = trans.buildTree(p, i)
-    arr = trans.buildNums(arr, 8)
-    n = 8
-    positions = []
-    for _ in range(8):
-        tmp = arr.copy()
-        positions.append(tmp)
-    time_sum = 0
-    nonleaf2leaf = lambda nonleaf:[0]+[2*a-b for a,b in zip(nonleaf[:-1],nonleaf[1:])]
-    random_leaf_seq = lambda n: nonleaf2leaf(random_nonleaf_seq(n))
-    for _ in range(50):
-        tmp_tar = random_leaf_seq(8)
-        for k in range(len(tmp_tar)):
-            tmp_tar[k] *= 8
-        time_start=time.time()
-        transm.test(positions, tmp_tar)
-        time_end = time.time()
-        time_sum += (time_end - time_start)
-        print(tmp_tar)
-    time_sum /= 50
-    print('totally cost',time_sum)
-    
-    
-    '''
-
     time_sum_alg1 = 0
     time_sum_alg2 = 0
     nonleaf2leaf = lambda nonleaf:[0]+[2*a-b for a,b in zip(nonleaf[:-1],nonleaf[1:])]

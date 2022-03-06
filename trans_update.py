@@ -128,6 +128,7 @@ def choose(data,n):
     assert n>0,"不能取0个"
     if n > len(data) : return []
     res = [list(i) for i in combinations(data,n)]
+    return res
 
 
 def get_nodes_cost(tree):
@@ -170,7 +171,7 @@ def main(positions,leaves):
         else: # 树不完整
             tmp_trees.extend(news) # 加入新结果
             tmp_trees.sort(key=lambda x:x.cost-x.depth) # 排序
-    print("ans is ", min_cost)
+    # print("ans is ", min_cost)
     return optimal,min_cost
 
 def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):

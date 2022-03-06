@@ -74,10 +74,12 @@ def dfs(nums, target, i, cost):
     target为每层要求节点数
     i为递归到了第几层 0, 1, 2
     '''
+    # print()
     # print('成功进入')
     global ans
     # 此时还没有算出cost
     if i == len(target) - 1: # 最后一层不用管,后面直接不用算了
+        # cost += sum(x for x in nums[0][2 ** (i + 1) - 1:] if x is not None)
         ans = min(ans, cost)
         #ans.append(cost)
         return
@@ -207,7 +209,7 @@ def test(positions, arr):
     global ans
     ans = math.inf
     dfs(positions, arr, 0, 0)
-    print("ans is ", ans)
+    # print("ans is ", ans)
 
 def main():
     '''
