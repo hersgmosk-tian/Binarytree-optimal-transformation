@@ -1,9 +1,12 @@
+import imp
 import math
 from tqdm import tqdm
 import time
 from random import randint
 import trans_ori
 import trans_update
+import pandas as pd
+import numpy as np
 
 def random_nonleaf_seq(n):
     """随机生成 n 层的非叶节点序列"""
@@ -15,7 +18,7 @@ def random_nonleaf_seq(n):
         seq.append(randint(1,total))
     return seq+[0]
 
-def main():
+def main(depth_):
     '''
     p = [-1, -2, -4, -6, -10, 11, 21, 35, -7, 40, -11, -5, -8, -9, -12, -14, -16, 12, 5, 50, -15, 20, -17, 111, 9, -13, -3]
     i = [11, -10, 21, -6, 35, -4, 40, -7, -11, -2, -8, -5, 12, -16, 5, -14, 50, -12, 20, -15, 111, -17, 9, -9, -13, -1, -3]
@@ -55,9 +58,12 @@ def main():
     min_time_alg2 = math.inf
     ans_list1 = []
     ans_list2 = []
-    depth = 15
+    # depth_ = 16
+    time_list_alg1 = []
+    time_list_alg2 = []
+    depth = depth_ - 1
     # for _ in range(1000):
-    for _ in tqdm(range(1000), "Tree Transfer Test"):
+    for _ in tqdm(range(100), "Tree Transfer Test"):
         positons = []
         for tree_k in range(8):
             # if tree_k ==  0:
@@ -65,16 +71,16 @@ def main():
                 # tmp_arr = BTree.tree_to_positions(tmp_arr)
                 # positons.append(tmp_arr)
             # else:
-            tmp_arr = trans_update.BTree.random_binary_tree(randint(1, depth), 0, 200)
-            tmp_arr = trans_update.BTree.tree_to_positions(tmp_arr)
+            tmp_arr = trans_update.BTree.random_binary_tree(randint(1, depth), 1, 200)
+            tmp_arr = trans_update.BTree.tree_to_positions(tmp_arr, depth_)
             positons.append(tmp_arr)
         # print(len(positons))
         # tmp_arr = BTree.random_binary_tree(7, 1)
         # tmp_arr = BTree.tree_to_positions(tmp_arr)
-        tmp_tar = [0] * (depth+1)
+        tmp_tar = [0] * (depth_)
         "这里加总了八棵树的叶子节点数量之和"
         for _ in range(1):
-            ttmp_tar = random_leaf_seq(depth + 1)
+            ttmp_tar = random_leaf_seq(depth_)
             for kk in range(len(tmp_tar)):
                 tmp_tar[kk] += ttmp_tar[kk]
         # print(positons[0][:10], tmp_tar)
@@ -90,24 +96,51 @@ def main():
         
         # time_end = time.time()
         # spend_time = time_end - time_start
+        time_list_alg1.append(alg1_spend_time)
         max_time_alg1 = max(max_time_alg1, alg1_spend_time)
         min_time_alg1 = min(min_time_alg1, alg1_spend_time)
         time_sum_alg1 += alg1_spend_time
 
+        time_list_alg2.append(alg2_spend_time)
         max_time_alg2 = max(max_time_alg2, alg2_spend_time)
         min_time_alg2 = min(min_time_alg2, alg2_spend_time)
         time_sum_alg2 += alg2_spend_time
         # print(tmp_tar)
-    time_sum_alg1 /= 1000
-    time_sum_alg2 /= 1000
+    time_sum_alg1 /= 100
+    time_sum_alg2 /= 100
     # print(ans_list1 == ans_list1)
+    time_var_alg1 = np.var(time_list_alg1)
+    time_var_alg2 = np.var(time_list_alg2)
     print('平均时长_alg1：', time_sum_alg1)
     print('平均时长_alg2：', time_sum_alg2)
     print('最长花费_alg1：', max_time_alg1)
     print('最长花费_alg2：', max_time_alg2)
     print('最短花费_alg1：', min_time_alg1)    
-    print('最短花费_alg2：', min_time_alg2) 
-    return
+    print('最短花费_alg2：', min_time_alg2)
+    print('时长方差_alg1：', time_var_alg1)
+    print('时长方差_alg2：', time_var_alg2)
+    res = [time_sum_alg1,time_sum_alg2,max_time_alg1,max_time_alg2,min_time_alg1,min_time_alg2,time_var_alg1, time_var_alg2]
+    return res
+
+def test():
+    results = pd.DataFrame({
+        'd'             : [],
+        'time_sum_alg1' : [],
+        'time_sum_alg2' : [],
+        'max_time_alg1' : [],
+        'max_time_alg2' : [],
+        'min_time_alg1' : [],
+        'min_time_alg2' : [],
+        'time_var_alg1' : [],
+        'time_var_alg2' : []
+    })
+    for d in range(4, 25):
+        print(d)
+        res = main(d)
+        results.loc[len(results.index)] = [d] + res
+
+    results.to_csv('results.csv', index=False)
+    print(results)
 
 if __name__ == '__main__':
-    main()
+    test()

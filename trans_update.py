@@ -114,9 +114,9 @@ class BTree(Node):
         return t
     
     @staticmethod
-    def tree_to_positions(tree):
+    def tree_to_positions(tree, depth):
         """树转列表"""
-        depth = 16 # 树深度
+        # depth = 16 # 树深度
         positions = [None for i in range(2**depth-1)]
         for node in tree:
             positions[node.position-1]=node.value
@@ -156,8 +156,9 @@ def main(positions,leaves):
     global min_cost
     min_cost = sum(leaf_cost.values()) # 最小开销
     # 提前找min_cost 
-    min_greedy = greedy_mincost(root, nonleaves, nonleaf_cost, leaf_cost)
-    print(min_greedy)
+    # min_greedy = greedy_mincost(root, nonleaves, nonleaf_cost, leaf_cost)
+    # min_cost = min_greedy
+    # print(min_greedy)
     optimal = None # 最优解
     tmp_trees = [root] # 待遍历集合
     while len(tmp_trees):
@@ -174,7 +175,7 @@ def main(positions,leaves):
         else: # 树不完整
             tmp_trees.extend(news) # 加入新结果
             tmp_trees.sort(key=lambda x:x.cost-x.depth) # 排序
-    print("ans is ", min_cost)
+    # print("ans is ", min_cost)
     return optimal,min_cost
 
 def next_level(tree,nonleaves,nonleaf_cost,leaf_cost):
@@ -233,7 +234,7 @@ def greedy_mincost(tree, nonleaves, nonleaf_cost, leaf_cost):
         new.add_left_right_to_node(node) # 展开
         new._max_depth += 1
         if len(leaf_cost) == 1:
-            return leaf_cost[node]
+            return sum(leaf_cost.values())
 
     while nonleaves[d] != 0:
         d += 1
@@ -345,7 +346,7 @@ def random_nonleaves_seq(n):
 nonleaves2leaves = lambda nonleaves:[0]+[2*a-b for a,b in zip(nonleaves[:-1],nonleaves[1:])]
 random_leaves_seq = lambda n: nonleaves2leaves(random_nonleaves_seq(n))
 
-def random_tree_positions(n,max_value=30)->list:
+def random_tree_positions(n, depth, max_value=30)->list:
     """生成随机树，叶子取值范围为 [0,max_value]"""
     tree = BTree.random_binary_tree(n-1,max_value)
-    return BTree.tree_to_positions(tree)
+    return BTree.tree_to_positions(tree, depth)
